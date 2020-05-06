@@ -1,0 +1,3 @@
+rootProject.name='Sudokai'
+include ':app'
+include ':openCVLibrary343'

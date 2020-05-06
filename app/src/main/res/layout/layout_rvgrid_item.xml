@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rvGridItem"
+    android:layout_width="48dp"
+    android:layout_height="48dp"
+    android:clickable="true"
+    android:focusable="true">
+
+    <TextView
+        android:id="@+id/emptyTextView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="@string/_0"
+        android:textSize="35sp"
+        android:visibility="invisible"
+        android:textStyle="bold" />
+
+    <com.abs192.sudokai.views.GridCanvas
+        android:id="@+id/gridCanvas"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</RelativeLayout>
