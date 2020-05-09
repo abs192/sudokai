@@ -27,13 +27,6 @@ class FrameRect(var displayWidth: Int, var displayHeight: Int) {
     }
 
     private fun calculate() {
-        Log.d(
-            "asas", "$width, $height}"
-        )
-        Log.d(
-            "asas", "$minWidth, $maxWidth}"
-        )
-
         x = (displayWidth / 2) - (width / 2)
         y = (displayHeight / 2) - (height / 2)
     }

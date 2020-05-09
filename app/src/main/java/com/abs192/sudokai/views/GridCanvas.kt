@@ -1,20 +1,13 @@
 package com.abs192.sudokai.views
 
-import android.animation.PropertyValuesHolder
 import android.animation.TimeAnimator
 import android.animation.TimeAnimator.TimeListener
-import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Rect
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
-import androidx.core.content.ContextCompat
-import com.abs192.sudokai.R
-
 
 class GridCanvas(context: Context?, attributeSet: AttributeSet?) : View(context, attributeSet) {
 
@@ -31,13 +24,8 @@ class GridCanvas(context: Context?, attributeSet: AttributeSet?) : View(context,
     //    var drawTop = true
     var drawBottom = true
 
-    private val PROPERTY_STROKE_WIDTH_1 = "anim_width_1"
-    private val PROPERTY_STROKE_WIDTH_2 = "anim_width_2"
-
-    private var animator: ValueAnimator = ValueAnimator()
-
-    private var strokeWidth1 = 0F
-    private var strokeWidth2 = 0F
+    private var strokeWidth1 = 2F
+    private var strokeWidth2 = 12F
     private var bgAlpha = 0F
     private var alphaSign = 1
 
@@ -56,19 +44,17 @@ class GridCanvas(context: Context?, attributeSet: AttributeSet?) : View(context,
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         mTimeAnimator = TimeAnimator()
-        mTimeAnimator?.setTimeListener(TimeListener { animation, totalTime, deltaTime ->
-            if (!isLaidOut) { // Ignore all calls before the view has been measured and laid out.
+        mTimeAnimator?.setTimeListener(TimeListener { _, _, _ ->
+            if (!isLaidOut) {
                 return@TimeListener
             }
-            updateState(deltaTime)
+            updateState()
             invalidate()
         })
         mTimeAnimator?.start()
     }
 
-    private fun updateState(deltaMs: Long) {
-//        Log.d(javaClass.simpleName, "$x $y $deltaMs")
-//        var x = deltaMs % 10
+    private fun updateState() {
         if (bgAlpha >= 50) {
             alphaSign = -1
         }
@@ -76,7 +62,6 @@ class GridCanvas(context: Context?, attributeSet: AttributeSet?) : View(context,
             alphaSign = 1
         }
         bgAlpha += (alphaSign * 0.25).toFloat()
-
     }
 
 
@@ -123,23 +108,6 @@ class GridCanvas(context: Context?, attributeSet: AttributeSet?) : View(context,
         r = right.toFloat()
         t = top.toFloat()
         b = bottom.toFloat()
-        initAnim()
-    }
-
-    private fun initAnim() {
-        val propertyStrokeWidth1: PropertyValuesHolder =
-            PropertyValuesHolder.ofFloat(PROPERTY_STROKE_WIDTH_1, 0F, 2F)
-        val propertyStrokeWidth2: PropertyValuesHolder =
-            PropertyValuesHolder.ofFloat(PROPERTY_STROKE_WIDTH_2, 0F, 15F)
-
-        animator.setValues(propertyStrokeWidth1, propertyStrokeWidth2)
-        animator.duration = Math.random().toLong()
-        animator.addUpdateListener { animation ->
-            strokeWidth1 = animation.getAnimatedValue(PROPERTY_STROKE_WIDTH_1) as Float
-            strokeWidth2 = animation.getAnimatedValue(PROPERTY_STROKE_WIDTH_2) as Float
-            invalidate()
-        }
-        animator.start()
     }
 
     override fun onDraw(canvas: Canvas?) {

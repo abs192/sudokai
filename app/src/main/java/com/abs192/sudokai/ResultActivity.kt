@@ -4,12 +4,13 @@ import android.app.Dialog
 import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.graphics.Point
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
+import android.view.WindowManager
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -20,33 +21,37 @@ import com.abs192.sudokai.storage.Storage
 import com.abs192.sudokai.views.GridCanvas
 import com.abs192.sudokai.views.RVGridNumbersViewAdapter
 import com.abs192.sudokai.views.RVGridViewAdapter
+import com.abs192.sudokai.views.SudokaiDisplayImageView
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.activity_main.*
 
 class ResultActivity : AppCompatActivity() {
 
     private lateinit var classifier: Classifier
-
     private var resultLayout: ConstraintLayout? = null
     private var rvGrid: RecyclerView? = null
     private var rvGridNumbers: RecyclerView? = null
+
     private var gridCanvas: GridCanvas? = null
     private var progressBar: ProgressBar? = null
     private var buttonSolve: Button? = null
     private var buttonRefresh: Button? = null
     private var buttonEdit: ToggleButton? = null
     private var buttonShowImage: Button? = null
+    private var imageDisplayDialog: Dialog? = null
+    private var sudokaiDisplayImageView: SudokaiDisplayImageView? = null
     private val solver = Solver()
-    private val initBoardData = BoardData()
 
+    private val initBoardData = BoardData()
     private val storage = Storage(this)
 
     private var imageBitmap: Bitmap? = null
 
     private val mModelPath = "model.tflite"
-    private val mLabelPath = "labels.txt"
 
+    private val mLabelPath = "labels.txt"
     private var cvSudoku: CVSudoku? = null
+
+    private var imgSize: Int = 0
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,6 +70,11 @@ class ResultActivity : AppCompatActivity() {
 
         gridCanvas = findViewById(R.id.gridCanvas)
 
+        val metrics: DisplayMetrics? = resources?.displayMetrics
+        val w = metrics!!.widthPixels
+
+        imgSize = w
+
         rvGrid = findViewById(R.id.rvGrid)
         rvGridNumbers = findViewById(R.id.rvGridNumbers)
 
@@ -75,6 +85,8 @@ class ResultActivity : AppCompatActivity() {
         cvSudoku = imageBitmap?.let { CVSudoku(it, classifier, storage) }
         val boardData = initializeBoard(cvSudoku)!!
         initBoardData.copyFrom(boardData)
+
+        imageDisplayDialog = makeImageDisplayDialog(cvSudoku?.bitmap!!)
 
         rvGridNumbers?.layoutManager = GridLayoutManager(this, boardData.getSize())
         val gridAdapter = RVGridViewAdapter(this, boardData.getSize())
@@ -148,7 +160,7 @@ class ResultActivity : AppCompatActivity() {
         }
 
         buttonShowImage?.setOnClickListener {
-            showImageDialog(cvSudoku?.bitmap!!)
+            imageDisplayDialog?.show()
         }
     }
 
@@ -156,20 +168,25 @@ class ResultActivity : AppCompatActivity() {
         return board?.generatedBoardData()
     }
 
-    fun showImageDialog(bitmap: Bitmap) {
+    private fun makeImageDisplayDialog(bitmap: Bitmap): Dialog {
         val builder = Dialog(this)
         builder.requestWindowFeature(Window.FEATURE_NO_TITLE);
         builder.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
-        val imageView = ImageView(this)
-        imageView.setImageBitmap(bitmap)
-        builder.addContentView(
-            imageView, RelativeLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
+        sudokaiDisplayImageView = SudokaiDisplayImageView(this)
+
+        val layoutParams = WindowManager.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
         )
-        builder.show()
+
+        layoutParams.width = imgSize
+        layoutParams.height = imgSize
+
+        builder.addContentView(
+            sudokaiDisplayImageView!!, layoutParams
+        )
+        return builder
     }
 
 

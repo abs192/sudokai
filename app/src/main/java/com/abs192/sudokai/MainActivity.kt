@@ -1,7 +1,6 @@
 package com.abs192.sudokai
 
 import android.Manifest
-import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
@@ -185,7 +184,6 @@ class MainActivity : AppCompatActivity(), SudokaiImageDialog.ImageCropListener {
                 }
                 return
             }
-
             // Add other 'when' lines to check for other
             // permissions this app might request.
             else -> {
@@ -331,7 +329,6 @@ class MainActivity : AppCompatActivity(), SudokaiImageDialog.ImageCropListener {
     }
 
     override fun cropDone(bitmap: Bitmap, points: Array<Point>) {
-
         Thread(Runnable {
             val sortedPoints = points.map { cv2CanvasUtil.getCVPoint(it) }
             val finalBitmap = cvImageHelper.wrapPerspective(sortedPoints, imgSize, bitmap)

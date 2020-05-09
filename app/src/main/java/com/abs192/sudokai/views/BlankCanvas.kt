@@ -24,11 +24,16 @@ class BlankCanvas(context: Context?, attributeSet: AttributeSet?) : View(context
 
     private val frameCornerRadius = 5F
 
+    private val metrics: DisplayMetrics? = context?.resources?.displayMetrics
+
+    private var displayWidth = 0
+    private var displayHeight = 0
+
     private val cvImageHelper = CVImageHelper()
     private val cV2CanvasUtil = CV2CanvasUtil()
     private val framePaint = Paint()
 
-    public var showFrame = true
+    var showFrame = true
 
     private val mLoaderCallback: BaseLoaderCallback = object : BaseLoaderCallback(context) {
         override fun onManagerConnected(status: Int) {
@@ -42,8 +47,6 @@ class BlankCanvas(context: Context?, attributeSet: AttributeSet?) : View(context
             }
         }
     }
-
-    private val metrics: DisplayMetrics? = context?.resources?.displayMetrics
 
     private lateinit var frameRect: Rect
     private lateinit var frameRectObj: FrameRect
@@ -59,6 +62,8 @@ class BlankCanvas(context: Context?, attributeSet: AttributeSet?) : View(context
     var strokeWidth = 0
 
     init {
+        displayWidth = metrics!!.widthPixels
+        displayHeight = metrics.heightPixels
 
         this.setBackgroundColor(Color.TRANSPARENT)
         context?.let { OpenCVUtil().initOpenCV(tag, it, mLoaderCallback) }
@@ -96,7 +101,7 @@ class BlankCanvas(context: Context?, attributeSet: AttributeSet?) : View(context
 
     private fun setFrameRect() {
 
-        frameRectObj = FrameRect(metrics!!.widthPixels, metrics.heightPixels)
+        frameRectObj = FrameRect(displayWidth, displayHeight)
         frameRect = Rect(
             frameRectObj.x,
             frameRectObj.y,
@@ -109,8 +114,8 @@ class BlankCanvas(context: Context?, attributeSet: AttributeSet?) : View(context
     private fun drawFrame(canvas: Canvas?) {
 
         framePaint.strokeWidth = strokeWidth.toFloat()
-        val viewWidth = width / 2
-        val viewHeight = height / 2
+        val viewWidth = displayWidth / 2
+        val viewHeight = displayHeight / 2
 
         val leftTopX = viewWidth - frameSize
         val leftTopY = viewHeight - frameSize
@@ -118,13 +123,6 @@ class BlankCanvas(context: Context?, attributeSet: AttributeSet?) : View(context
         val rightBotX = viewWidth + frameSize
         val rightBotY = viewHeight + frameSize
 
-//        canvas?.rotate(rotate.toFloat(), frameRect.width().toFloat(), frameRect.height().toFloat())
-//        canvas?.drawRoundRect(
-//            RectF(frameRect),
-//            frameCornerRadius,
-//            frameCornerRadius,
-//            framePaint
-//        )
         if (showFrame) {
             canvas?.drawRoundRect(
                 leftTopX.toFloat(),
@@ -139,11 +137,11 @@ class BlankCanvas(context: Context?, attributeSet: AttributeSet?) : View(context
     }
 
     fun getFrameImage(bitmap: Bitmap): Bitmap? {
-//        Log.d(tag, "h w : ${frameRect.height()} ${frameRect.width()}")
-//        Log.d(
-//            tag,
-//            "l r t b : ${frameRect.left} ${frameRect.right} ${frameRect.top} ${frameRect.bottom}"
-//        )
+        Log.d(tag, "h w : ${frameRect.height()} ${frameRect.width()}")
+        Log.d(
+            tag,
+            "l r t b : ${frameRect.left} ${frameRect.right} ${frameRect.top} ${frameRect.bottom}"
+        )
         return cvImageHelper.roi(bitmap, cV2CanvasUtil.getCVRect(frameRect))
     }
 
